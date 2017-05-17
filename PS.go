@@ -83,6 +83,7 @@ func main() {
 		fmt.Println("=======================================================================")
 		fmt.Println()
 	}
+	fmt.Println("============================<< SUCCESS >>=============================")
 }
 
 // ============================================================================================================================
@@ -114,6 +115,7 @@ func (t *PS) Init(stub shim.ChaincodeStubInterface, function string, args []stri
 	// fmt.Println("Init CityCode R015 : " + cityCode.R105)
 	// fmt.Println("=======================================================================")
 	// fmt.Println()
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -194,6 +196,7 @@ func (t *PS) save_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]
 	petsitter := Petsitter{args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9], args[10], args[11], args[12], args[13], time.String()}
 	jsonAsBytes, _ := json.Marshal(petsitter)
 	stub.PutState(email, jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -263,6 +266,7 @@ func (t *PS) modify_petsitter(stub shim.ChaincodeStubInterface, args []string) (
 
 	jsonAsBytes, _ := json.Marshal(petsitter)
 	stub.PutState(args[0], jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -289,6 +293,7 @@ func (t *PS) delete_petsitter(stub shim.ChaincodeStubInterface, args []string) (
 		return nil, errors.New("[Petsitter DELETE] Not exist Petsitter")
 	}
 	stub.DelState(args[0])
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -313,6 +318,7 @@ func (t *PS) save_home_address(stub shim.ChaincodeStubInterface, args []string) 
 	homeAsset.Code = args[5]
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -334,6 +340,7 @@ func (t *PS) save_home_room(stub shim.ChaincodeStubInterface, args []string) ([]
 	homeAsset.Room = args[2]
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -355,6 +362,7 @@ func (t *PS) save_home_car_elevator(stub shim.ChaincodeStubInterface, args []str
 	homeAsset.Parking = args[2]
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -399,6 +407,7 @@ func (t *PS) modify_home_address(stub shim.ChaincodeStubInterface, args []string
 
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -434,6 +443,7 @@ func (t *PS) modify_home_room(stub shim.ChaincodeStubInterface, args []string) (
 
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -469,6 +479,7 @@ func (t *PS) modify_home_car_elevator(stub shim.ChaincodeStubInterface, args []s
 
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
@@ -503,6 +514,7 @@ func (t *PS) save_tran(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	tradeRec.TH = th
 	jsonAsBytes, _ := json.Marshal(tradeRec)
 	stub.PutState(psid+"#"+csid+"#"+tc, jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
 
 	return nil, nil
 }
