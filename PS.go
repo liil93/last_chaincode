@@ -170,14 +170,14 @@ func (t *PS) Query(stub shim.ChaincodeStubInterface, function string, args []str
 }
 
 func (t *PS) save_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 15 {
+	if len(args) != 14 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
 		fmt.Println("                          <<<< Petsitter Insert >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 15")
+		fmt.Println("               Incorrect number of arguments. Expecting 14")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return nil, errors.New("[Petsitter INSSERT] Incorrect number of arguments. Expecting 15")
+		return nil, errors.New("[Petsitter INSSERT] Incorrect number of arguments. Expecting 14")
 	}
 	conf, _ := stub.GetState(args[0])
 	if conf != nil {
