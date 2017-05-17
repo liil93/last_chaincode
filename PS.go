@@ -118,30 +118,27 @@ func (t *PS) Init(stub shim.ChaincodeStubInterface, function string, args []stri
 	return nil, nil
 }
 
-// ============================================================================================================================
-// Invoke - Our entry point for Invocations
-// ============================================================================================================================
 func (t *PS) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	if function == "save_petsitter" {
-		return t.UInsert(stub, args)
+		return t.save_petsitter(stub, args)
 	} else if function == "modify_petsitter" {
-		return t.UChange(stub, args)
+		return t.modify_petsitter(stub, args)
 	} else if function == "delete_petsitter" {
-		return t.UDelete(stub, args)
+		return t.delete_petsitter(stub, args)
 	} else if function == "save_home_address" {
-		return t.SHomeAddress(stub, args)
+		return t.save_home_address(stub, args)
 	} else if function == "save_home_room" {
-		return t.SHomeRoom(stub, args)
+		return t.save_home_room(stub, args)
 	} else if function == "save_home_car_elevator" {
-		return t.SHomeCarElevator(stub, args)
+		return t.save_home_car_elevator(stub, args)
 	} else if function == "modify_home_address" {
-		return t.HChangeAddress(stub, args)
+		return t.modify_home_address(stub, args)
 	} else if function == "modify_home_room" {
-		return t.HChangeRoom(stub, args)
+		return t.modify_home_room(stub, args)
 	} else if function == "modify_home_car_elevator" {
-		return t.HChangeCarElevator(stub, args)
+		return t.modify_home_car_elevator(stub, args)
 	} else if function == "save_tran" {
-		return t.TInsert(stub, args)
+		return t.save_tran(stub, args)
 	}
 
 	fmt.Println()
@@ -154,16 +151,13 @@ func (t *PS) Invoke(stub shim.ChaincodeStubInterface, function string, args []st
 	return nil, errors.New("[INVOKE] Received unknown function invocation: " + function)
 }
 
-// ============================================================================================================================
-// Query - Our entry point for Queries
-// ============================================================================================================================
 func (t *PS) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	if function == "read_petsitter" {
-		return t.URead(stub, args)
+		return t.read_petsitter(stub, args)
 	} else if function == "read_house" {
-		return t.HRead(stub, args)
+		return t.read_house(stub, args)
 	} else if function == "search_tran" {
-		return t.TSearch(stub, args)
+		return t.search_tran(stub, args)
 	}
 	fmt.Println()
 	fmt.Println("=======================================================================")
@@ -175,313 +169,7 @@ func (t *PS) Query(stub shim.ChaincodeStubInterface, function string, args []str
 	return nil, errors.New("[QUERY] Received unknown function query: " + function)
 }
 
-// ============================================================================================================================
-// TSearch - search trade information
-// ============================================================================================================================
-func (t *PS) TSearch(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 3 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Trade Search >>>>")
-		fmt.Println("                Incorrect number of arguments. Expecting 3")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[TRADE SEARCH] Incorrect number of arguments. Expecting 3")
-	}
-	psid := args[0]
-	csid := args[1]
-	tc := args[2]
-	valAsbytes, _ := stub.GetState(psid + "#" + csid + "#" + tc)
-	if valAsbytes == nil {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Trade Search >>>>")
-		fmt.Println("                           Not exist transaction")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return []byte("[TRADE SEARCH] Not exist transaction"), errors.New("[TRADE SEARCH] Not exist transaction")
-	}
-	fmt.Println()
-	fmt.Println("=======================================================================")
-	fmt.Println("                           <<<< Trade Search >>>>")
-	fmt.Println("                           Trade reading success")
-	fmt.Println("=======================================================================")
-	fmt.Println()
-	return valAsbytes, nil
-}
-
-// ============================================================================================================================
-// TInsert - insert transaction information
-// ============================================================================================================================
-func (t *PS) TInsert(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 8 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Trade Insert >>>>")
-		fmt.Println("                Incorrect number of arguments. Expecting 8")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[TRADE INSSERT] Incorrect number of arguments. Expecting 8")
-	}
-	psid := args[0]
-	psnick := args[1]
-	csid := args[2]
-	ts := args[3]
-	te := args[4]
-	tc := args[5]
-	ta := args[6]
-	th := args[7]
-
-	tradeRec := TradeRec{}
-	tradeRec.PSID = psid
-	tradeRec.PSNickname = psnick
-	tradeRec.CSID = csid
-	tradeRec.TS = ts
-	tradeRec.TE = te
-	tradeRec.TC = tc
-	tradeRec.TA = ta
-	tradeRec.TH = th
-	jsonAsBytes, _ := json.Marshal(tradeRec)
-	stub.PutState(psid+"#"+csid+"#"+tc, jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// URead - read user information
-// ============================================================================================================================
-func (t *PS) HRead(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 1 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Read >>>>")
-		fmt.Println("                Incorrect number of arguments. Expecting 1")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home QUERY] Incorrect number of arguments. Expecting 1")
-	}
-	key := args[0] + "#home"
-	valAsbytes, _ := stub.GetState(key) //get the pet information from chaincode state
-	if valAsbytes == nil {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Read >>>>")
-		fmt.Println("                              Not exist Home")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return []byte("[Home QUERY] Not exist Home"), errors.New("[Home QUERY] Not exist Home")
-	}
-	fmt.Println()
-	fmt.Println("=======================================================================")
-	fmt.Println("                           <<<< Home Read >>>>")
-	fmt.Println("                      Reading success, ID: " + key)
-	fmt.Println("=======================================================================")
-	fmt.Println()
-	return valAsbytes, nil
-}
-
-// ============================================================================================================================
-// UChange - change user information (PW, AP)
-// ============================================================================================================================
-func (t *PS) HChangeCarElevator(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 3 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Change >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 3")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 3")
-	}
-	confUser, _ := stub.GetState(args[0])
-	if confUser == nil {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Change >>>>")
-		fmt.Println("                               Not exist Home")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home CHANGE] Not exist Home")
-	}
-	homeAsset := HomeAsset{}
-	json.Unmarshal(confUser, &homeAsset)
-	if args[1] != "none" {
-		homeAsset.Elevator = args[1]
-	}
-	if args[2] != "none" {
-		homeAsset.Parking = args[2]
-	}
-
-	jsonAsBytes, _ := json.Marshal(homeAsset)
-	stub.PutState(args[0]+"#home", jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// UChange - change user information (PW, AP)
-// ============================================================================================================================
-func (t *PS) HChangeRoom(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 3 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Change >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 3")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 3")
-	}
-	confUser, _ := stub.GetState(args[0])
-	if confUser == nil {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Change >>>>")
-		fmt.Println("                               Not exist Home")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home CHANGE] Not exist Home")
-	}
-	homeAsset := HomeAsset{}
-	json.Unmarshal(confUser, &homeAsset)
-	if args[1] != "none" {
-		homeAsset.Type = args[1]
-	}
-	if args[2] != "none" {
-		homeAsset.Room = args[2]
-	}
-
-	jsonAsBytes, _ := json.Marshal(homeAsset)
-	stub.PutState(args[0]+"#home", jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// UChange - change user information (PW, AP)
-// ============================================================================================================================
-func (t *PS) HChangeAddress(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 6 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Change >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 6")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 6")
-	}
-	confUser, _ := stub.GetState(args[0])
-	if confUser == nil {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Home Change >>>>")
-		fmt.Println("                               Not exist Home")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home CHANGE] Not exist Home")
-	}
-	homeAsset := HomeAsset{}
-	json.Unmarshal(confUser, &homeAsset)
-	if args[1] != "none" {
-		homeAsset.State = args[1]
-	}
-	if args[2] != "none" {
-		homeAsset.City = args[2]
-	}
-	if args[3] != "none" {
-		homeAsset.Street = args[3]
-	}
-	if args[4] != "none" {
-		homeAsset.Adt = args[4]
-	}
-	if args[5] != "none" {
-		homeAsset.Code = args[5]
-	}
-
-	jsonAsBytes, _ := json.Marshal(homeAsset)
-	stub.PutState(args[0]+"#home", jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// UInsert - insert user information
-// ============================================================================================================================
-func (t *PS) SHomeAddress(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 6 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                          <<<< Home Insert >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 6")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 6")
-	}
-	conf, _ := stub.GetState(args[0])
-	homeAsset := HomeAsset{}
-	json.Unmarshal(conf, &homeAsset)
-	homeAsset.State = args[1]
-	homeAsset.City = args[2]
-	homeAsset.Street = args[3]
-	homeAsset.Adt = args[4]
-	homeAsset.Code = args[5]
-	jsonAsBytes, _ := json.Marshal(homeAsset)
-	stub.PutState(args[0]+"#home", jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// UInsert - insert user information
-// ============================================================================================================================
-func (t *PS) SHomeRoom(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 3 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                          <<<< Home Insert >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 3")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 3")
-	}
-	conf, _ := stub.GetState(args[0])
-	homeAsset := HomeAsset{}
-	json.Unmarshal(conf, &homeAsset)
-	homeAsset.Type = args[1]
-	homeAsset.Room = args[2]
-	jsonAsBytes, _ := json.Marshal(homeAsset)
-	stub.PutState(args[0]+"#home", jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// UInsert - insert user information
-// ============================================================================================================================
-func (t *PS) SHomeCarElevator(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 3 {
-		fmt.Println()
-		fmt.Println("=======================================================================")
-		fmt.Println("                          <<<< Home Insert >>>>")
-		fmt.Println("               Incorrect number of arguments. Expecting 3")
-		fmt.Println("=======================================================================")
-		fmt.Println()
-		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 3")
-	}
-	conf, _ := stub.GetState(args[0])
-	homeAsset := HomeAsset{}
-	json.Unmarshal(conf, &homeAsset)
-	homeAsset.Elevator = args[1]
-	homeAsset.Parking = args[2]
-	jsonAsBytes, _ := json.Marshal(homeAsset)
-	stub.PutState(args[0]+"#home", jsonAsBytes)
-
-	return nil, nil
-}
-
-// ============================================================================================================================
-// UInsert - insert user information
-// ============================================================================================================================
-func (t *PS) UInsert(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *PS) save_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 15 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
@@ -510,10 +198,7 @@ func (t *PS) UInsert(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	return nil, nil
 }
 
-// ============================================================================================================================
-// UChange - change user information (PW, AP)
-// ============================================================================================================================
-func (t *PS) UChange(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *PS) modify_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 15 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
@@ -582,10 +267,247 @@ func (t *PS) UChange(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	return nil, nil
 }
 
-// ============================================================================================================================
-// URead - read user information
-// ============================================================================================================================
-func (t *PS) URead(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *PS) delete_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                        <<<< Petsitter Delete >>>>")
+		fmt.Println("                Incorrect number of arguments. Expecting 1")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Petsitter DELETE] Incorrect number of arguments. Expecting 1")
+	}
+	userID := args[0]
+	conf, _ := stub.GetState(userID)
+	if conf == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Petsitter Delete >>>>")
+		fmt.Println("                              Not exist Petsitter")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Petsitter DELETE] Not exist Petsitter")
+	}
+	stub.DelState(args[0])
+
+	return nil, nil
+}
+
+func (t *PS) save_home_address(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 6 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                          <<<< Home Insert >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 6")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 6")
+	}
+	conf, _ := stub.GetState(args[0])
+	homeAsset := HomeAsset{}
+	json.Unmarshal(conf, &homeAsset)
+	homeAsset.State = args[1]
+	homeAsset.City = args[2]
+	homeAsset.Street = args[3]
+	homeAsset.Adt = args[4]
+	homeAsset.Code = args[5]
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) save_home_room(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 3 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                          <<<< Home Insert >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 3")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 3")
+	}
+	conf, _ := stub.GetState(args[0])
+	homeAsset := HomeAsset{}
+	json.Unmarshal(conf, &homeAsset)
+	homeAsset.Type = args[1]
+	homeAsset.Room = args[2]
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) save_home_car_elevator(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 3 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                          <<<< Home Insert >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 3")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 3")
+	}
+	conf, _ := stub.GetState(args[0])
+	homeAsset := HomeAsset{}
+	json.Unmarshal(conf, &homeAsset)
+	homeAsset.Elevator = args[1]
+	homeAsset.Parking = args[2]
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) modify_home_address(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 6 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 6")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 6")
+	}
+	confUser, _ := stub.GetState(args[0])
+	if confUser == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("                               Not exist Home")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Not exist Home")
+	}
+	homeAsset := HomeAsset{}
+	json.Unmarshal(confUser, &homeAsset)
+	if args[1] != "none" {
+		homeAsset.State = args[1]
+	}
+	if args[2] != "none" {
+		homeAsset.City = args[2]
+	}
+	if args[3] != "none" {
+		homeAsset.Street = args[3]
+	}
+	if args[4] != "none" {
+		homeAsset.Adt = args[4]
+	}
+	if args[5] != "none" {
+		homeAsset.Code = args[5]
+	}
+
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) modify_home_room(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 3 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 3")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 3")
+	}
+	confUser, _ := stub.GetState(args[0])
+	if confUser == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("                               Not exist Home")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Not exist Home")
+	}
+	homeAsset := HomeAsset{}
+	json.Unmarshal(confUser, &homeAsset)
+	if args[1] != "none" {
+		homeAsset.Type = args[1]
+	}
+	if args[2] != "none" {
+		homeAsset.Room = args[2]
+	}
+
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) modify_home_car_elevator(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 3 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 3")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 3")
+	}
+	confUser, _ := stub.GetState(args[0])
+	if confUser == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("                               Not exist Home")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Not exist Home")
+	}
+	homeAsset := HomeAsset{}
+	json.Unmarshal(confUser, &homeAsset)
+	if args[1] != "none" {
+		homeAsset.Elevator = args[1]
+	}
+	if args[2] != "none" {
+		homeAsset.Parking = args[2]
+	}
+
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) save_tran(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 8 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Trade Insert >>>>")
+		fmt.Println("                Incorrect number of arguments. Expecting 8")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[TRADE INSSERT] Incorrect number of arguments. Expecting 8")
+	}
+	psid := args[0]
+	psnick := args[1]
+	csid := args[2]
+	ts := args[3]
+	te := args[4]
+	tc := args[5]
+	ta := args[6]
+	th := args[7]
+
+	tradeRec := TradeRec{}
+	tradeRec.PSID = psid
+	tradeRec.PSNickname = psnick
+	tradeRec.CSID = csid
+	tradeRec.TS = ts
+	tradeRec.TE = te
+	tradeRec.TC = tc
+	tradeRec.TA = ta
+	tradeRec.TH = th
+	jsonAsBytes, _ := json.Marshal(tradeRec)
+	stub.PutState(psid+"#"+csid+"#"+tc, jsonAsBytes)
+
+	return nil, nil
+}
+
+func (t *PS) read_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
@@ -615,31 +537,63 @@ func (t *PS) URead(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 	return valAsbytes, nil
 }
 
-// ============================================================================================================================
-// UDelete - delete Petsitter information
-// ============================================================================================================================
-func (t *PS) UDelete(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *PS) read_house(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
-		fmt.Println("                        <<<< Petsitter Delete >>>>")
+		fmt.Println("                           <<<< Home Read >>>>")
 		fmt.Println("                Incorrect number of arguments. Expecting 1")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return nil, errors.New("[Petsitter DELETE] Incorrect number of arguments. Expecting 1")
+		return nil, errors.New("[Home QUERY] Incorrect number of arguments. Expecting 1")
 	}
-	userID := args[0]
-	conf, _ := stub.GetState(userID)
-	if conf == nil {
+	key := args[0] + "#home"
+	valAsbytes, _ := stub.GetState(key) //get the pet information from chaincode state
+	if valAsbytes == nil {
 		fmt.Println()
 		fmt.Println("=======================================================================")
-		fmt.Println("                           <<<< Petsitter Delete >>>>")
-		fmt.Println("                              Not exist Petsitter")
+		fmt.Println("                           <<<< Home Read >>>>")
+		fmt.Println("                              Not exist Home")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return nil, errors.New("[Petsitter DELETE] Not exist Petsitter")
+		return []byte("[Home QUERY] Not exist Home"), errors.New("[Home QUERY] Not exist Home")
 	}
-	stub.DelState(args[0])
-
-	return nil, nil
+	fmt.Println()
+	fmt.Println("=======================================================================")
+	fmt.Println("                           <<<< Home Read >>>>")
+	fmt.Println("                      Reading success, ID: " + key)
+	fmt.Println("=======================================================================")
+	fmt.Println()
+	return valAsbytes, nil
+}
+func (t *PS) search_tran(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 3 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Trade Search >>>>")
+		fmt.Println("                Incorrect number of arguments. Expecting 3")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[TRADE SEARCH] Incorrect number of arguments. Expecting 3")
+	}
+	psid := args[0]
+	csid := args[1]
+	tc := args[2]
+	valAsbytes, _ := stub.GetState(psid + "#" + csid + "#" + tc)
+	if valAsbytes == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Trade Search >>>>")
+		fmt.Println("                           Not exist transaction")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return []byte("[TRADE SEARCH] Not exist transaction"), errors.New("[TRADE SEARCH] Not exist transaction")
+	}
+	fmt.Println()
+	fmt.Println("=======================================================================")
+	fmt.Println("                           <<<< Trade Search >>>>")
+	fmt.Println("                           Trade reading success")
+	fmt.Println("=======================================================================")
+	fmt.Println()
+	return valAsbytes, nil
 }
