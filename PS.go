@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -609,16 +610,16 @@ func (t *PS) search_tran(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	return valAsbytes, nil
 }
 
-// 지역, 총마리수, 대형견, 중형견, 소형견
+// 지역, 총마리수, 대형견, 중형견, 소형견, 체크인, 체크아웃
 func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 5 {
+	if len(args) != 7 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
 		fmt.Println("                           <<<< SearchByTotal >>>>")
-		fmt.Println("                Incorrect number of arguments. Expecting 5")
+		fmt.Println("                Incorrect number of arguments. Expecting 7")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return nil, errors.New("[SearchByTotal] Incorrect number of arguments. Expecting 5")
+		return nil, errors.New("[SearchByTotal] Incorrect number of arguments. Expecting 7")
 	}
 	var start, end int
 	var ret string
@@ -632,12 +633,31 @@ func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]
 				psh, _ := stub.GetState(CCstr[start:end] + "#home")
 				json.Unmarshal(ps, &srt)
 				json.Unmarshal(psh, &srth)
+				ret = ret + "first"
 				if srth.State == args[0] {
+					ret = ret + "state"
 					if srt.TotalNum >= args[1] {
+						ret = ret + "total"
 						if srt.NumL >= args[2] {
 							if srt.NumM >= args[3] {
 								if srt.NumS >= args[4] {
-									ret = ret + CCstr[start:end] + "/"
+									ret = ret + "num test"
+
+									T1, _ := strconv.Atoi(srt.Start)
+									T2, _ := strconv.Atoi(args[5])
+									if T1 <= T2 {
+										ret = ret + "t1t2 test"
+										T3, _ := strconv.Atoi(srt.End)
+										T4, _ := strconv.Atoi(args[6])
+										if T3 >= T4 {
+											ret = ret + "t3t4 test"
+											for j, w := range args[7] {
+												fmt.Printf(strconv.Itoa(j) + "/")
+												fmt.Println(w)
+
+											}
+										}
+									}
 								}
 							}
 						}
