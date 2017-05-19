@@ -53,6 +53,7 @@ type HomeAsset struct { // Information about home (KEY: User email#home)
 	Room     string
 	Elevator string
 	Parking  string
+	SaveTime string
 }
 
 func main() {
@@ -302,6 +303,7 @@ func (t *PS) save_home_address(stub shim.ChaincodeStubInterface, args []string) 
 	homeAsset.Street = args[3]
 	homeAsset.Adt = args[4]
 	homeAsset.Code = args[5]
+	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
@@ -326,6 +328,7 @@ func (t *PS) save_home_room(stub shim.ChaincodeStubInterface, args []string) ([]
 	json.Unmarshal(conf, &homeAsset)
 	homeAsset.Type = args[1]
 	homeAsset.Room = args[2]
+	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
@@ -350,6 +353,7 @@ func (t *PS) save_home_car_elevator(stub shim.ChaincodeStubInterface, args []str
 	json.Unmarshal(conf, &homeAsset)
 	homeAsset.Elevator = args[1]
 	homeAsset.Parking = args[2]
+	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
@@ -396,7 +400,7 @@ func (t *PS) modify_home_address(stub shim.ChaincodeStubInterface, args []string
 	if args[5] != "none" {
 		homeAsset.Code = args[5]
 	}
-
+	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
@@ -434,7 +438,7 @@ func (t *PS) modify_home_room(stub shim.ChaincodeStubInterface, args []string) (
 	if args[2] != "none" {
 		homeAsset.Room = args[2]
 	}
-
+	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
@@ -472,7 +476,7 @@ func (t *PS) modify_home_car_elevator(stub shim.ChaincodeStubInterface, args []s
 	if args[2] != "none" {
 		homeAsset.Parking = args[2]
 	}
-
+	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
@@ -633,28 +637,45 @@ func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]
 				psh, _ := stub.GetState(CCstr[start:end] + "#home")
 				json.Unmarshal(ps, &srt)
 				json.Unmarshal(psh, &srth)
-				ret = ret + "first"
 				if srth.State == args[0] {
-					ret = ret + "state"
-					if srt.TotalNum >= args[1] {
-						ret = ret + "total"
-						if srt.NumL >= args[2] {
-							if srt.NumM >= args[3] {
-								if srt.NumS >= args[4] {
-									ret = ret + "num test"
-
+					N1, _ := strconv.Atoi(srt.TotalNum)
+					N2, _ := strconv.Atoi(args[1])
+					if N1 >= N2 {
+						N3, _ := strconv.Atoi(srt.NumL)
+						N4, _ := strconv.Atoi(args[2])
+						if N3 >= N4 {
+							N5, _ := strconv.Atoi(srt.NumM)
+							N6, _ := strconv.Atoi(args[3])
+							if N5 >= N6 {
+								N5, _ := strconv.Atoi(srt.NumS)
+								N6, _ := strconv.Atoi(args[4])
+								if N5 >= N6 {
 									T1, _ := strconv.Atoi(srt.Start)
 									T2, _ := strconv.Atoi(args[5])
 									if T1 <= T2 {
-										ret = ret + "t1t2 test"
 										T3, _ := strconv.Atoi(srt.End)
 										T4, _ := strconv.Atoi(args[6])
 										if T3 >= T4 {
-											ret = ret + "t3t4 test"
-											for j, w := range args[7] {
-												fmt.Printf(strconv.Itoa(j) + "/")
-												fmt.Println(w)
-
+											if len(srt.Except)%8 == 0 {
+												check := 1
+												for j := 0; j < len(srt.Except)/8; j++ {
+													Q1, _ := strconv.Atoi(srt.Except[j*8 : (j+1)*8])
+													if Q1 > T2 {
+														if Q1 < T4 {
+															check = 0
+														}
+													}
+												}
+												if check == 1 {
+													ret1 := CCstr[start:end] + "," + srt.Nickname + "," + srt.CostL + "," + srt.CostM + "," + srt.CostS + "," + srt.Start + "," + srt.End + "," + srt.Except + "," + srt.TotalNum + ","
+													ret2 := srt.NumL + "," + srt.NumM + "," + srt.NumS + "," + srt.Home + "," + srt.HomeInfo + "," + srt.SaveTime + "," + srth.State + "," + srth.City + "," + srth.Street + ","
+													ret3 := srth.Adt + "," + srth.Code + ","
+													ret4 := srth.Type + "," + srth.Room + ","
+													ret5 := srth.Elevator + "," + srth.Parking + "," + srth.SaveTime
+													ret = ret + ret1 + ret2 + ret3 + ret4 + ret5 + "/"
+												}
+											} else {
+												return []byte("Error Except date"), errors.New("Error Except date")
 											}
 										}
 									}
@@ -666,6 +687,9 @@ func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]
 			}
 			start = end + 1
 		}
+	}
+	if ret == "" {
+		return []byte("no result"), nil
 	}
 	return []byte(ret), nil
 }
