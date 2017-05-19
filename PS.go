@@ -516,6 +516,16 @@ func (t *PS) save_tran(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	tradeRec.TH = th
 	jsonAsBytes, _ := json.Marshal(tradeRec)
 	stub.PutState(psid+"#"+csid+"#"+tc, jsonAsBytes)
+
+	var tstr string
+	conft, _ := stub.GetState(psid + "#t")
+	json.Unmarshal(conft, &tstr)
+	if tstr == "" {
+		tstr = "/"
+	}
+	tstr = tstr + psid + "#" + csid + "#" + tc + "/"
+	tbyte, _ := json.Marshal(tstr)
+	stub.PutState(psid+"#t", tbyte)
 	fmt.Println("============================<< SUCCESS >>=============================")
 	fmt.Println("                  <<<< Save Transaction chaincode >>>>")
 	fmt.Println("======================================================================")
@@ -583,20 +593,19 @@ func (t *PS) read_house(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	return valAsbytes, nil
 }
 func (t *PS) search_tran(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 3 {
+	if len(args) != 1 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
 		fmt.Println("                           <<<< Trade Search >>>>")
-		fmt.Println("                Incorrect number of arguments. Expecting 3")
+		fmt.Println("                Incorrect number of arguments. Expecting 1")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return nil, errors.New("[TRADE SEARCH] Incorrect number of arguments. Expecting 3")
+		return nil, errors.New("[TRADE SEARCH] Incorrect number of arguments. Expecting 1")
 	}
-	psid := args[0]
-	csid := args[1]
-	tc := args[2]
-	valAsbytes, _ := stub.GetState(psid + "#" + csid + "#" + tc)
-	if valAsbytes == nil {
+	var tt string
+	ttt, _ := stub.GetState(args[0] + "#t")
+	json.Unmarshal(ttt, &tt)
+	if len(tt) < 2 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
 		fmt.Println("                           <<<< Trade Search >>>>")
@@ -605,13 +614,29 @@ func (t *PS) search_tran(stub shim.ChaincodeStubInterface, args []string) ([]byt
 		fmt.Println()
 		return []byte("[TRADE SEARCH] Not exist transaction"), errors.New("[TRADE SEARCH] Not exist transaction")
 	}
+
+	var start, end int
+	var ret string
+	tra := TradeRec{}
+	for i, v := range tt {
+		if v == 47 {
+			end = i
+			if tt[start:end] != "" {
+				valAsbytes, _ := stub.GetState(tt[start:end])
+				json.Unmarshal(valAsbytes, &tra)
+				ret = ret + "0" + "," + tra.PSID + "," + tra.PSNickname + "," + tra.CSID + "," + tra.TS + "," + tra.TE + "," + tra.TC + "," + tra.TA + "," + tra.TH + "/"
+			}
+			start = end + 1
+		}
+	}
+
 	fmt.Println()
 	fmt.Println("=======================================================================")
 	fmt.Println("                           <<<< Trade Search >>>>")
 	fmt.Println("                           Trade reading success")
 	fmt.Println("=======================================================================")
 	fmt.Println()
-	return valAsbytes, nil
+	return []byte(ret), nil
 }
 
 // 지역, 총마리수, 대형견, 중형견, 소형견, 체크인, 체크아웃
