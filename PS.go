@@ -693,7 +693,7 @@ func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]
 												}
 												if check == 1 {
 													ret1 := CCstr[start:end] + "," + srt.Nickname + "," + srt.CostL + "," + srt.CostM + "," + srt.CostS + "," + srt.Start + "," + srt.End + "," + srt.Except + "," + srt.TotalNum + ","
-													ret2 := srt.NumL + "," + srt.NumM + "," + srt.NumS + "," + srt.Home + "," + srt.HomeInfo + "," + srt.SaveTime + "," + srth.State + "," + srth.City + "," + srth.Street + ","
+													ret2 := srt.NumL + "," + srt.NumM + "," + srt.NumS + "," + srt.Home + "," + srt.HomeInfo + "," + srt.SaveTime + "?" + srth.State + "," + srth.City + "," + srth.Street + ","
 													ret3 := srth.Adt + "," + srth.Code + ","
 													ret4 := srth.Type + "," + srth.Room + ","
 													ret5 := srth.Elevator + "," + srth.Parking + "," + srth.SaveTime
