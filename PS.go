@@ -108,6 +108,8 @@ func (t *PS) Invoke(stub shim.ChaincodeStubInterface, function string, args []st
 		return t.modify_home_car_elevator(stub, args)
 	} else if function == "save_tran" {
 		return t.save_tran(stub, args)
+	} else if function == "delete_house" {
+		return t.delete_house(stub, args)
 	}
 
 	fmt.Println()
@@ -481,6 +483,35 @@ func (t *PS) modify_home_car_elevator(stub shim.ChaincodeStubInterface, args []s
 	stub.PutState(args[0]+"#home", jsonAsBytes)
 	fmt.Println("============================<< SUCCESS >>=============================")
 	fmt.Println("                  <<<< Home Modify chaincode >>>>")
+	fmt.Println("======================================================================")
+
+	return nil, nil
+}
+
+func (t *PS) delete_house(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                        <<<< Home Delete >>>>")
+		fmt.Println("                Incorrect number of arguments. Expecting 1")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home DELETE] Incorrect number of arguments. Expecting 1")
+	}
+	userID := args[0] + "#home"
+	conf, _ := stub.GetState(userID)
+	if conf == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Delete >>>>")
+		fmt.Println("                              Not exist Home")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home DELETE] Not exist Home")
+	}
+	stub.DelState(userID)
+	fmt.Println("============================<< SUCCESS >>=============================")
+	fmt.Println("                  <<<< Home Delete chaincode >>>>")
 	fmt.Println("======================================================================")
 
 	return nil, nil
