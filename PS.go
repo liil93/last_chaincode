@@ -587,7 +587,7 @@ func (t *PS) read_petsitter(stub shim.ChaincodeStubInterface, args []string) ([]
 		fmt.Println("                              Not exist Petsitter")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return []byte("[Petsitter QUERY] Not exist Petsitter"), errors.New("[Petsitter QUERY] Not exist Petsitter")
+		return []byte("None"), errors.New("[Petsitter QUERY] Not exist Petsitter")
 	}
 	fmt.Println()
 	fmt.Println("=======================================================================")
@@ -617,7 +617,7 @@ func (t *PS) read_house(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		fmt.Println("                              Not exist Home")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return []byte("[Home QUERY] Not exist Home"), errors.New("[Home QUERY] Not exist Home")
+		return []byte("None"), errors.New("[Home QUERY] Not exist Home")
 	}
 	fmt.Println()
 	fmt.Println("=======================================================================")
@@ -647,7 +647,7 @@ func (t *PS) search_tran(stub shim.ChaincodeStubInterface, args []string) ([]byt
 		fmt.Println("                           Not exist transaction")
 		fmt.Println("=======================================================================")
 		fmt.Println()
-		return []byte("[TRADE SEARCH] Not exist transaction"), errors.New("[TRADE SEARCH] Not exist transaction")
+		return []byte("None"), errors.New("[TRADE SEARCH] Not exist transaction")
 	}
 
 	var start, end int
@@ -749,7 +749,7 @@ func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]
 		}
 	}
 	if ret == "" {
-		return []byte("no result"), nil
+		return []byte("None"), nil
 	}
 	return []byte(ret), nil
 }
