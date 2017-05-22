@@ -135,6 +135,8 @@ func (t *PS) Query(stub shim.ChaincodeStubInterface, function string, args []str
 		return t.search_tran(stub, args)
 	} else if function == "search_bytotal" {
 		return t.search_bytotal(stub, args)
+	} else if function == "search_bystate" {
+		return t.search_bystate(stub, args)
 	}
 	fmt.Println()
 	fmt.Println("=======================================================================")
@@ -843,4 +845,47 @@ func (t *PS) modify_home(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	fmt.Println("======================================================================")
 
 	return nil, nil
+}
+
+// 지역
+func (t *PS) search_bystate(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< SearchByTotal >>>>")
+		fmt.Println("                Incorrect number of arguments. Expecting 1")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[SearchByTotal] Incorrect number of arguments. Expecting 1")
+	}
+	var start, end int
+	var ret string
+	srt := Petsitter{}
+	srth := HomeAsset{}
+
+	for i, v := range CCstr {
+		if v == 47 {
+			end = i
+			if CCstr[start:end] != "" {
+				ps, _ := stub.GetState(CCstr[start:end])
+				psh, _ := stub.GetState(CCstr[start:end] + "#home")
+				json.Unmarshal(ps, &srt)
+				json.Unmarshal(psh, &srth)
+				if srth.State == args[0] {
+					ret1 := CCstr[start:end] + "," + srt.Nickname + "," + srt.CostL + "," + srt.CostM + "," + srt.CostS + "," + srt.Start + "," + srt.End + "," + srt.Except + "," + srt.TotalNum + ","
+					ret2 := srt.NumL + "," + srt.NumM + "," + srt.NumS + "," + srt.Home + "," + srt.HomeInfo + "," + srt.SaveTime + "?" + srth.State + "," + srth.City + "," + srth.Street + ","
+					ret3 := srth.Adt + "," + srth.Code + ","
+					ret4 := srth.Type + "," + srth.Room + ","
+					ret5 := srth.Elevator + "," + srth.Parking + "," + srth.SaveTime
+					ret = ret + ret1 + ret2 + ret3 + ret4 + ret5 + "/"
+
+				}
+			}
+			start = end + 1
+		}
+	}
+	if ret == "" {
+		return []byte("None"), nil
+	}
+	return []byte(ret), nil
 }
