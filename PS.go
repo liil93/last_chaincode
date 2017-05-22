@@ -774,7 +774,7 @@ func (t *PS) save_home(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	homeAsset.Code = args[5]
 	homeAsset.Type = args[6]
 	homeAsset.Room = args[7]
-	HomeAsset.Elevator = args[8]
+	homeAsset.Elevator = args[8]
 	homeAsset.Parking = args[9]
 	homeAsset.SaveTime = time.Now().String()
 	jsonAsBytes, _ := json.Marshal(homeAsset)
