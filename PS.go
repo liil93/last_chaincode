@@ -110,6 +110,10 @@ func (t *PS) Invoke(stub shim.ChaincodeStubInterface, function string, args []st
 		return t.save_tran(stub, args)
 	} else if function == "delete_house" {
 		return t.delete_house(stub, args)
+	} else if function == "save_home" {
+		return t.save_home(stub, args)
+	} else if function == "modify_home" {
+		return t.modify_home(stub, args)
 	}
 
 	fmt.Println()
@@ -748,4 +752,95 @@ func (t *PS) search_bytotal(stub shim.ChaincodeStubInterface, args []string) ([]
 		return []byte("no result"), nil
 	}
 	return []byte(ret), nil
+}
+
+func (t *PS) save_home(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 10 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                          <<<< Home Insert >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 10")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home INSSERT] Incorrect number of arguments. Expecting 10")
+	}
+	conf, _ := stub.GetState(args[0] + "#home")
+	homeAsset := HomeAsset{}
+	json.Unmarshal(conf, &homeAsset)
+	homeAsset.State = args[1]
+	homeAsset.City = args[2]
+	homeAsset.Street = args[3]
+	homeAsset.Adt = args[4]
+	homeAsset.Code = args[5]
+	homeAsset.Type = args[6]
+	homeAsset.Room = args[7]
+	HomeAsset.Elevator = args[8]
+	homeAsset.Parking = args[9]
+	homeAsset.SaveTime = time.Now().String()
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
+	fmt.Println("                  <<<< Home Insert chaincode >>>>")
+	fmt.Println("======================================================================")
+
+	return nil, nil
+}
+
+func (t *PS) modify_home(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 10 {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("               Incorrect number of arguments. Expecting 10")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Incorrect number of arguments. Expecting 10")
+	}
+	confUser, _ := stub.GetState(args[0] + "#home")
+	if confUser == nil {
+		fmt.Println()
+		fmt.Println("=======================================================================")
+		fmt.Println("                           <<<< Home Change >>>>")
+		fmt.Println("                               Not exist Home")
+		fmt.Println("=======================================================================")
+		fmt.Println()
+		return nil, errors.New("[Home CHANGE] Not exist Home")
+	}
+	homeAsset := HomeAsset{}
+	json.Unmarshal(confUser, &homeAsset)
+	if args[1] != "none" {
+		homeAsset.State = args[1]
+	}
+	if args[2] != "none" {
+		homeAsset.City = args[2]
+	}
+	if args[3] != "none" {
+		homeAsset.Street = args[3]
+	}
+	if args[4] != "none" {
+		homeAsset.Adt = args[4]
+	}
+	if args[5] != "none" {
+		homeAsset.Code = args[5]
+	}
+	if args[6] != "none" {
+		homeAsset.Type = args[6]
+	}
+	if args[7] != "none" {
+		homeAsset.Room = args[7]
+	}
+	if args[8] != "none" {
+		homeAsset.Elevator = args[8]
+	}
+	if args[9] != "none" {
+		homeAsset.Parking = args[9]
+	}
+	homeAsset.SaveTime = time.Now().String()
+	jsonAsBytes, _ := json.Marshal(homeAsset)
+	stub.PutState(args[0]+"#home", jsonAsBytes)
+	fmt.Println("============================<< SUCCESS >>=============================")
+	fmt.Println("                  <<<< Home Modify chaincode >>>>")
+	fmt.Println("======================================================================")
+
+	return nil, nil
 }
