@@ -135,8 +135,8 @@ func (t *PS) Query(stub shim.ChaincodeStubInterface, function string, args []str
 		return t.search_tran(stub, args)
 	} else if function == "search_bytotal" {
 		return t.search_bytotal(stub, args)
-	} else if function == "search_bystate" {
-		return t.search_bystate(stub, args)
+	} else if function == "search_byregion" {
+		return t.search_byregion(stub, args)
 	}
 	fmt.Println()
 	fmt.Println("=======================================================================")
@@ -848,7 +848,7 @@ func (t *PS) modify_home(stub shim.ChaincodeStubInterface, args []string) ([]byt
 }
 
 // 지역
-func (t *PS) search_bystate(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *PS) search_byregion(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
 		fmt.Println()
 		fmt.Println("=======================================================================")
