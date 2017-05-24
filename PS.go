@@ -117,7 +117,7 @@ func (t *PS) Invoke(stub shim.ChaincodeStubInterface, function string, args []st
 	}
 
 	fmt.Println()
-	fmt.Println("=======================================================================")ㄴㄷ
+	fmt.Println("=======================================================================")
 	fmt.Println("                              <<<< Invoke >>>>")
 	fmt.Println("               Invoke did not find func: " + function)
 	fmt.Println("=======================================================================")
