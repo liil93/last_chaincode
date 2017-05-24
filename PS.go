@@ -117,7 +117,7 @@ func (t *PS) Invoke(stub shim.ChaincodeStubInterface, function string, args []st
 	}
 
 	fmt.Println()
-	fmt.Println("=======================================================================")
+	fmt.Println("=======================================================================")ㄴㄷ
 	fmt.Println("                              <<<< Invoke >>>>")
 	fmt.Println("               Invoke did not find func: " + function)
 	fmt.Println("=======================================================================")
@@ -656,12 +656,12 @@ func (t *PS) search_tran(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	var ret string
 	tra := TradeRec{}
 	for i, v := range tt {
-		if v == 47 {
+		if v == 38 {
 			end = i
 			if tt[start:end] != "" {
 				valAsbytes, _ := stub.GetState(tt[start:end])
 				json.Unmarshal(valAsbytes, &tra)
-				ret = ret + "0" + "," + tra.PSID + "," + tra.PSNickname + "," + tra.CSID + "," + tra.TS + "," + tra.TE + "," + tra.TC + "," + tra.TA + "," + tra.TH + "/"
+				ret = ret + "0" + "," + tra.PSID + "," + tra.PSNickname + "," + tra.CSID + "," + tra.TS + "," + tra.TE + "," + tra.TC + "," + tra.TA + "," + tra.TH + "&"
 			}
 			start = end + 1
 		}
